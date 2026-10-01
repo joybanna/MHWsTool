@@ -1,0 +1,89 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --font-funnel: "Segoe UI";
+  --font-sans: var(--font-funnel), sans-serif;
+
+  --color-background: #101722;
+  --color-content: #1a2533;
+  --color-content-alt: #213043;
+  --color-divider: #34475a;
+  --color-disabled: var(--color-zinc-800);
+  --color-primary: #e8eef7;
+  --color-secondary: #cedde8;
+  --color-tertiary: #a2b4c5;
+  --color-placeholder: #9fb9cc;
+
+  --color-input: var(--color-content-alt);
+  
+  --color-accent: #74d7e5;
+  --color-accent-alt: #42afc4;
+  
+  --color-info: var(--color-blue-300);
+  --color-success: var(--color-green-500);
+  --color-error: var(--color-rose-400);
+  --color-warning: var(--color-amber-500);
+  
+  --spacing-8xl: 88rem;
+  --spacing-9xl: 96rem;
+  --spacing-10xl: 104rem;
+  --spacing-11xl: 112rem;
+}
+
+
+h1 {
+  @apply text-base;
+}
+
+h2 {
+  @apply text-sm;
+}
+
+h3 {
+  @apply text-xs;
+}
+
+/* Prevent SVGs from shrinking */
+svg {
+  @apply shrink-0;
+}
+
+
+input[type="number"] {
+  -moz-appearance: textfield; /* Firefox */
+}
+
+/* Chrome, Safari, Edge, Opera */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Hide default arrow in select dropdown */
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+select::-ms-expand {
+  display: none;
+}
+
+textarea {
+  @apply focus:outline-none border border-divider focus:border-secondary;
+}
+
+th {
+  @apply font-medium;
+}
+
+/* Wilds Forge desktop theme; calculations and data remain upstream. */
+:root { color-scheme: dark; }
+.bg-content { border: 1px solid #34475a; border-radius: 12px; }
+h1 { font-weight: 700; }
+input, select, textarea { border-radius: 6px; }
+button { border-radius: 7px; }
+* { scrollbar-color: #42596f #101722; scrollbar-width: thin; }

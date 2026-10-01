@@ -1,0 +1,26 @@
+<UserControl x:Class="MHWsTool.DamageCalculatorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Loaded="View_Loaded" Background="#101722" Foreground="#E8EEF7">
+  <Grid>
+    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+    <Grid Margin="0,0,0,12">
+      <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+      <StackPanel>
+        <TextBlock Text="Damage Calculator" FontSize="21" FontWeight="Bold"/>
+        <TextBlock Text="Weapon · Skills · Buffs · Monster hitzones · Attack damage · Combos" Foreground="#A2B4C5" FontSize="12" Margin="0,3,0,0"/>
+      </StackPanel>
+      <TextBlock Grid.Column="1" Text="●  OFFLINE CALCULATOR" Foreground="#78D5D6" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center"/>
+    </Grid>
+    <Border Grid.Row="1" BorderBrush="#34475A" BorderThickness="1" CornerRadius="12" Background="#101722">
+      <Grid Margin="1">
+        <ContentControl x:Name="BrowserHost" Visibility="Collapsed"/>
+        <StackPanel x:Name="StatusPanel" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="570" Margin="24">
+          <TextBlock x:Name="StatusTitle" Text="Loading offline calculator…" FontSize="19" FontWeight="SemiBold" TextWrapping="Wrap" TextAlignment="Center"/>
+          <TextBlock x:Name="StatusDetail" Text="Preparing the bundled calculator and local game data." Foreground="#A2B4C5" Margin="0,10,0,0" TextWrapping="Wrap" TextAlignment="Center"/>
+          <Button x:Name="RetryButton" Content="Retry" Click="Retry_Click" Visibility="Collapsed" HorizontalAlignment="Center" Margin="0,16,0,0"/>
+        </StackPanel>
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

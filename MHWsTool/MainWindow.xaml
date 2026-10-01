@@ -1,0 +1,251 @@
+<Window x:Class="MHWsTool.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:MHWsTool"
+        Title="Wilds Forge — Planner &amp; Damage Calculator" Height="850" Width="1370" MinHeight="690" MinWidth="1050"
+        WindowStartupLocation="CenterScreen" Background="#101722" Foreground="#E8EEF7" FontFamily="Segoe UI">
+  <Window.Resources>
+    <ResourceDictionary>
+    <ResourceDictionary.MergedDictionaries><ResourceDictionary Source="SkillSelectorResources.xaml"/></ResourceDictionary.MergedDictionaries>
+    <SolidColorBrush x:Key="Panel" Color="#1A2533"/>
+    <SolidColorBrush x:Key="PanelAlt" Color="#213043"/>
+    <SolidColorBrush x:Key="Stroke" Color="#34475A"/>
+    <SolidColorBrush x:Key="Muted" Color="#A2B4C5"/>
+    <Style TargetType="Button">
+      <Setter Property="Background" Value="#26384B"/><Setter Property="Foreground" Value="White"/>
+      <Setter Property="BorderBrush" Value="#3B5369"/><Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Padding" Value="12,8"/><Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button">
+        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="7" Padding="{TemplateBinding Padding}">
+          <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Border>
+        <ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#31526A"/></Trigger></ControlTemplate.Triggers>
+      </ControlTemplate></Setter.Value></Setter>
+    </Style>
+    <Style x:Key="Primary" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+      <Setter Property="Background" Value="#42AFC4"/><Setter Property="Foreground" Value="#071925"/>
+      <Setter Property="BorderBrush" Value="#74D7E5"/><Setter Property="FontWeight" Value="Bold"/>
+    </Style>
+    <Style TargetType="TextBox"><Setter Property="Background" Value="#0D1621"/><Setter Property="Foreground" Value="White"/>
+      <Setter Property="BorderBrush" Value="#42596F"/><Setter Property="Padding" Value="9,7"/><Setter Property="CaretBrush" Value="White"/></Style>
+    <Style TargetType="ListBox"><Setter Property="Background" Value="#111C29"/><Setter Property="Foreground" Value="#E8EEF7"/><Setter Property="BorderBrush" Value="#34475A"/></Style>
+    <Style x:Key="Label" TargetType="TextBlock"><Setter Property="FontSize" Value="12"/><Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Foreground" Value="#9FB9CC"/><Setter Property="Margin" Value="0,14,0,7"/></Style>
+    <Style TargetType="TabItem">
+      <Setter Property="Foreground" Value="#A2B4C5"/><Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="TabItem">
+        <Border x:Name="TabBorder" Background="#1A2533" BorderBrush="#34475A" BorderThickness="1" CornerRadius="7" Padding="18,10" Margin="0,0,8,12">
+          <ContentPresenter ContentSource="Header"/>
+        </Border>
+        <ControlTemplate.Triggers>
+          <Trigger Property="IsSelected" Value="True"><Setter TargetName="TabBorder" Property="Background" Value="#16323C"/><Setter TargetName="TabBorder" Property="BorderBrush" Value="#42AFC4"/><Setter Property="Foreground" Value="#78D5D6"/></Trigger>
+          <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="TabBorder" Property="BorderBrush" Value="#74D7E5"/></Trigger>
+          <Trigger Property="IsKeyboardFocusWithin" Value="True"><Setter TargetName="TabBorder" Property="BorderThickness" Value="2"/></Trigger>
+        </ControlTemplate.Triggers>
+      </ControlTemplate></Setter.Value></Setter>
+    </Style>
+    <DataTemplate x:Key="SelectedSkillTemplate">
+      <Grid Margin="0,0,0,8"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="115"/><ColumnDefinition Width="38"/></Grid.ColumnDefinitions>
+        <StackPanel VerticalAlignment="Center" Margin="0,0,10,0">
+          <TextBlock Text="{Binding Name}" Foreground="#E8EEF7" FontSize="14" FontWeight="Normal" TextWrapping="Wrap"/>
+          <TextBlock Text="{Binding KindLabel}" Foreground="{StaticResource Muted}" FontSize="11" FontWeight="Normal"/>
+          <TextBlock Text="{Binding ProgressText}" Foreground="#78D5D6" FontSize="11" FontWeight="Normal" TextWrapping="Wrap">
+            <TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers>
+              <DataTrigger Binding="{Binding ProgressText}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
+            </Style.Triggers></Style></TextBlock.Style>
+          </TextBlock>
+        </StackPanel>
+        <ComboBox Grid.Column="1" Style="{StaticResource SkillLevelSelector}" ItemsSource="{Binding LevelOptions}" SelectedItem="{Binding SelectedOption, Mode=TwoWay}" SelectionChanged="TargetLevel_Changed" ToolTip="{Binding SelectedOption.MenuLabel}" AutomationProperties.Name="{Binding LevelControlName}" VerticalAlignment="Center"/>
+        <Button Grid.Column="2" Content="×" Click="RemoveSkill_Click" ToolTip="Remove skill" AutomationProperties.Name="{Binding RemoveControlName}" Padding="0" Margin="8,0,0,0" Height="30" VerticalAlignment="Center" FontSize="18" FontWeight="Normal"/>
+      </Grid>
+    </DataTemplate>
+    </ResourceDictionary>
+  </Window.Resources>
+  <Grid Margin="24,18">
+    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="16"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+    <Grid Grid.Row="0"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+      <StackPanel><TextBlock Text="WILDS FORGE" FontSize="29" FontWeight="Bold"/>
+        <TextBlock Text="Offline armor set planner and damage calculator for Monster Hunter Wilds" FontSize="13" Foreground="{StaticResource Muted}"/></StackPanel>
+      <Border Grid.Column="1" Background="#16323C" BorderBrush="#2B7080" BorderThickness="1" CornerRadius="8" Padding="12,7" VerticalAlignment="Center">
+        <TextBlock Text="●  OFFLINE DATA" Foreground="#78D5D6" FontWeight="SemiBold" FontSize="12"/></Border>
+    </Grid>
+    <TabControl Grid.Row="2" x:Name="AppTabs" Background="Transparent" BorderThickness="0" Padding="0">
+      <TabItem Header="Build Planner">
+    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="42*"/><ColumnDefinition Width="16"/><ColumnDefinition Width="58*"/></Grid.ColumnDefinitions>
+      <Border Grid.Column="0" Background="{StaticResource Panel}" BorderBrush="{StaticResource Stroke}" BorderThickness="1" CornerRadius="12">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Bottom" Margin="18,0,18,18">
+            <TextBlock x:Name="TargetSummary" Text="No required skills selected" Foreground="{StaticResource Muted}" FontSize="11" Margin="0,0,0,9"/>
+            <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+              <Button Content="Clear all settings" Click="Clear_Click" Margin="0,0,5,0"/>
+              <Button x:Name="SearchButton" Grid.Column="1" Content="SEARCH BUILDS" Style="{StaticResource Primary}" Click="Search_Click" Margin="5,0,0,0"/>
+            </Grid>
+          </StackPanel>
+          <StackPanel DockPanel.Dock="Top" Margin="18,14,18,0">
+            <TextBlock Text="BUILD PLANNER" FontSize="16" FontWeight="Bold"/>
+            <TextBlock Text="Choose required skills and skills on your weapon / talisman, then search for the remaining requirements." Foreground="{StaticResource Muted}" FontSize="12" Margin="0,3,0,0" TextWrapping="Wrap"/>
+              <TextBlock Text="Armor rank" Style="{StaticResource Label}"/>
+              <StackPanel Orientation="Horizontal"><RadioButton x:Name="HighRankRadio" Content="High Rank" GroupName="Rank" IsChecked="True" Checked="RankChanged" Margin="0,0,20,0" Foreground="#E8EEF7" FontWeight="Normal"/>
+                <RadioButton x:Name="LowRankRadio" Content="Low Rank" GroupName="Rank" Checked="RankChanged" Foreground="#E8EEF7" FontWeight="Normal"/></StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,13,0,0">
+              <TextBlock Text="Add to:" Foreground="{StaticResource Muted}" FontSize="12" FontWeight="Normal" Margin="0,0,12,0"/>
+              <RadioButton x:Name="RequiredSourceRadio" Content="Required" Tag="Required" GroupName="CatalogSource" IsChecked="True" Checked="CatalogSource_Changed" Foreground="#E8EEF7" FontWeight="Normal" Margin="0,0,14,0"/>
+              <RadioButton Content="On Weapon" Tag="Weapon" GroupName="CatalogSource" Checked="CatalogSource_Changed" Foreground="#E8EEF7" FontWeight="Normal" Margin="0,0,14,0"/>
+              <RadioButton Content="On Talisman" Tag="Talisman" GroupName="CatalogSource" Checked="CatalogSource_Changed" Foreground="#E8EEF7" FontWeight="Normal"/>
+            </StackPanel>
+            <Grid Margin="0,15,0,12">
+              <TextBox x:Name="SkillFilterBox" Style="{StaticResource SkillSearchInput}" TextChanged="SkillFilter_Changed" ToolTip="Search skills by name" AutomationProperties.Name="Search skills"/>
+              <TextBlock Text="Search skills by name" FontSize="14" FontWeight="Normal" Foreground="#9FB9CC" Margin="9,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False">
+                <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed"/>
+                  <Style.Triggers><DataTrigger Binding="{Binding Text, ElementName=SkillFilterBox}" Value=""><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers>
+                </Style></TextBlock.Style>
+              </TextBlock>
+            </Grid>
+          </StackPanel>
+          <ScrollViewer x:Name="PlannerScroll" VerticalScrollBarVisibility="Auto">
+            <ScrollViewer.Resources><Style TargetType="ScrollBar" BasedOn="{StaticResource CalculatorScrollBar}"/></ScrollViewer.Resources>
+            <StackPanel Margin="18,0,18,14">
+            <Expander x:Name="EquipmentSkillsOptions" Header="Skills on weapon / talisman" Margin="0,0,0,14" Foreground="#D9E8F0">
+              <StackPanel Margin="0,8,0,0">
+                <TextBlock Text="Skills entered here reduce the remaining requirements. Each Set / Group on an item counts as 1 piece toward its bonus." Foreground="{StaticResource Muted}" FontSize="11" FontWeight="Normal" TextWrapping="Wrap" Margin="0,0,0,12"/>
+                <CheckBox x:Name="ManualWeaponBox" Content="Use manual weapon skills" IsChecked="False" Checked="ManualEquipment_Changed" Unchecked="ManualEquipment_Changed" Foreground="#E8EEF7" FontWeight="Normal" Margin="0,0,0,8"/>
+                <TextBlock x:Name="NoWeaponSkills" Text="Select On Weapon above, then choose names from the catalog." Foreground="{StaticResource Muted}" FontSize="11" FontWeight="Normal" TextWrapping="Wrap" Margin="0,0,0,12"/>
+                <ItemsControl x:Name="WeaponSkillsList" ItemTemplate="{StaticResource SelectedSkillTemplate}" IsEnabled="{Binding IsChecked, ElementName=ManualWeaponBox}"/>
+                <CheckBox x:Name="ManualTalismanBox" Content="Use manual talisman skills" IsChecked="False" Checked="ManualEquipment_Changed" Unchecked="ManualEquipment_Changed" Foreground="#E8EEF7" FontWeight="Normal" Margin="0,6,0,8"/>
+                <TextBlock x:Name="NoTalismanSkills" Text="Select On Talisman above, then choose names from the catalog." Foreground="{StaticResource Muted}" FontSize="11" FontWeight="Normal" TextWrapping="Wrap" Margin="0,0,0,12"/>
+                <ItemsControl x:Name="TalismanSkillsList" ItemTemplate="{StaticResource SelectedSkillTemplate}" IsEnabled="{Binding IsChecked, ElementName=ManualTalismanBox}"/>
+              </StackPanel>
+            </Expander>
+            <TextBlock Text="Selected requirements · set Lv" FontSize="14" FontWeight="Normal" Foreground="#E8EEF7" Margin="0,0,0,8"/>
+            <TextBlock x:Name="NoSelectedSkills" Text="Choose a name from the catalog below. It will appear here with its required Lv." Foreground="{StaticResource Muted}" FontSize="12" Margin="0,0,0,12" TextWrapping="Wrap"/>
+            <ItemsControl x:Name="SelectedSkillsList" ItemTemplate="{StaticResource SelectedSkillTemplate}" Margin="0,0,0,8"/>
+            <Border Height="1" Background="{StaticResource Stroke}" Margin="0,0,0,14"/>
+            <TextBlock Text="Choose from catalog" FontSize="14" FontWeight="Normal" Foreground="#E8EEF7" Margin="0,0,0,4"/>
+            <TextBlock Text="Click a name to select it. Checked names are already selected." Foreground="{StaticResource Muted}" FontSize="11" Margin="0,0,0,12" TextWrapping="Wrap"/>
+            <TextBlock x:Name="NoMatchingSkills" Text="No skills match this search." Foreground="{StaticResource Muted}" Visibility="Collapsed" Margin="0,0,0,12" TextWrapping="Wrap"/>
+            <ItemsControl x:Name="SkillSectionsList" SizeChanged="SkillSections_SizeChanged">
+              <ItemsControl.ItemTemplate><DataTemplate><StackPanel Margin="0,0,0,12">
+                <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="Normal" Foreground="#E8EEF7" Margin="0,0,0,8"/>
+                <ItemsControl ItemsSource="{Binding Skills}">
+                  <ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Columns="{Binding Columns}"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate><DataTemplate>
+                    <ToggleButton Content="{Binding Name}" Style="{StaticResource SkillCatalogSelector}" IsChecked="{Binding IsSelected, Mode=TwoWay}" Checked="CatalogSkill_Changed" Unchecked="CatalogSkill_Changed" ToolTip="{Binding Name}" AutomationProperties.Name="{Binding Name}" Margin="0,0,8,8"/>
+                  </DataTemplate></ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel></DataTemplate></ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+          </StackPanel></ScrollViewer>
+        </DockPanel>
+      </Border>
+      <Border Grid.Column="2" Background="{StaticResource Panel}" BorderBrush="{StaticResource Stroke}" BorderThickness="1" CornerRadius="12">
+        <Grid Margin="20,16"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="10"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+          <StackPanel>
+            <StackPanel Orientation="Horizontal"><TextBlock Text="Search Results" FontSize="18" FontWeight="Normal"/>
+              <TextBlock x:Name="ResultCount" Text="0Sets" FontSize="18" FontWeight="Normal" Foreground="#C9D3E0" Margin="3,0,0,0"/></StackPanel>
+            <TextBlock x:Name="ResultSummary" Text="Choose skills, sets or groups and their required levels, then search for armor sets." Foreground="{StaticResource Muted}" Margin="0,3,0,0" TextWrapping="Wrap"/>
+          </StackPanel>
+          <ListBox Grid.Row="2" x:Name="ResultsList" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <ListBox.ItemTemplate><DataTemplate><Border Background="#07111D" BorderBrush="#4A5868" BorderThickness="1" CornerRadius="4" Margin="0,0,0,10" Padding="12">
+                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="38*"/><ColumnDefinition Width="12"/><ColumnDefinition Width="62*"/></Grid.ColumnDefinitions>
+                  <StackPanel>
+                    <ItemsControl ItemsSource="{Binding ArmorItems}">
+                      <ItemsControl.ItemTemplate><DataTemplate>
+                        <Grid Margin="0,0,0,4"><Grid.ColumnDefinitions><ColumnDefinition Width="24"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                          <Image Source="{Binding Icon}" Width="24" Height="24" Stretch="Uniform" AutomationProperties.Name="{Binding Kind}"/>
+                          <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="#33A3FF" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="5,0,0,0" ToolTip="{Binding Name}"/>
+                        </Grid>
+                      </DataTemplate></ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Grid Margin="0,2,0,0"><Grid.RowDefinitions><RowDefinition Height="1"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                      <Line X1="0" Y1="0" X2="1" Y2="0" Stretch="Fill" Stroke="#3E4A58" StrokeThickness="1" StrokeDashArray="2,2"/>
+                      <Grid Grid.Row="1" Margin="0,5,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="24"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <Image Source="/MHWsTool;component/Assets/results/charm.png" Width="24" Height="24" Stretch="Uniform" AutomationProperties.Name="Talisman"/>
+                        <TextBlock Grid.Column="1" Text="{Binding Charm}" Foreground="#33A3FF" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="5,0,0,0" ToolTip="{Binding Charm}"/>
+                      </Grid>
+                    </Grid>
+                  </StackPanel>
+                  <StackPanel Grid.Column="2">
+                    <Grid Margin="0,0,0,4"><Grid.ColumnDefinitions><ColumnDefinition Width="100"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                      <TextBlock Text="Skills" Foreground="#F3F6FA" FontWeight="Bold" FontSize="13" Margin="0,4,8,0"/>
+                      <ItemsControl Grid.Column="1" ItemsSource="{Binding SkillPills}" HorizontalAlignment="Right">
+                        <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel Orientation="Horizontal" HorizontalAlignment="Right"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate><DataTemplate>
+                          <Border x:Name="SkillPillBorder" Background="#282F39" BorderBrush="#4A5563" BorderThickness="1" CornerRadius="12" Padding="7,2" Margin="0,0,4,4" AutomationProperties.Name="{Binding Label}">
+                            <TextBlock Text="{Binding Text}" Foreground="#E8EEF7" FontSize="12" FontWeight="SemiBold" TextWrapping="NoWrap"/>
+                          </Border>
+                          <DataTemplate.Triggers><DataTrigger Binding="{Binding IsRequested}" Value="True">
+                            <Setter TargetName="SkillPillBorder" Property="BorderBrush" Value="#3C9CF5"/>
+                            <Setter TargetName="SkillPillBorder" Property="Background" Value="#1D2D3E"/>
+                          </DataTrigger></DataTemplate.Triggers>
+                        </DataTemplate></ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                    </Grid>
+                    <Grid><Grid.RowDefinitions><RowDefinition Height="1"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                      <Line X1="0" Y1="0" X2="1" Y2="0" Stretch="Fill" Stroke="#3E4A58" StrokeThickness="1" StrokeDashArray="2,2"/>
+                      <Grid Grid.Row="1" Margin="0,5,0,4"><Grid.ColumnDefinitions><ColumnDefinition Width="100"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <TextBlock Text="Free Slots" Foreground="#F3F6FA" FontWeight="Bold" FontSize="13" VerticalAlignment="Center"/>
+                        <ItemsControl Grid.Column="1" ItemsSource="{Binding SlotCategories}" Visibility="{Binding SlotGroupsVisibility}" HorizontalAlignment="Right">
+                          <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                          <ItemsControl.ItemTemplate><DataTemplate><StackPanel Orientation="Horizontal" Margin="8,0,0,0" ToolTip="{Binding Label}">
+                            <Image Source="{Binding Icon}" Width="20" Height="20" Stretch="Uniform" AutomationProperties.Name="{Binding Label}"/>
+                            <ItemsControl ItemsSource="{Binding Groups}">
+                              <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                              <ItemsControl.ItemTemplate><DataTemplate><StackPanel Orientation="Horizontal" Margin="5,0,0,0" ToolTip="{Binding Label}">
+                                <Image Source="{Binding Icon}" Width="18" Height="18" Stretch="Uniform" AutomationProperties.Name="{Binding Label}"/>
+                                <TextBlock Text="{Binding Count}" Foreground="#E8EEF7" FontSize="12" VerticalAlignment="Center" Margin="1,0,0,0"/>
+                              </StackPanel></DataTemplate></ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                          </StackPanel></DataTemplate></ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Grid.Column="1" Text="None" Visibility="{Binding NoSlotsVisibility}" Foreground="#E8EEF7" FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                      </Grid>
+                    </Grid>
+                    <Grid><Grid.RowDefinitions><RowDefinition Height="1"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                      <Line X1="0" Y1="0" X2="1" Y2="0" Stretch="Fill" Stroke="#3E4A58" StrokeThickness="1" StrokeDashArray="2,2"/>
+                      <Grid Grid.Row="1" Margin="0,4"><Grid.ColumnDefinitions><ColumnDefinition Width="100"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <TextBlock Text="Decoration" Foreground="#F3F6FA" FontWeight="Bold" FontSize="13" VerticalAlignment="Center"/>
+                        <ItemsControl Grid.Column="1" ItemsSource="{Binding DecorationGroups}" Visibility="{Binding DecorationGroupsVisibility}" HorizontalAlignment="Right">
+                          <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel Orientation="Horizontal" HorizontalAlignment="Right"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                          <ItemsControl.ItemTemplate><DataTemplate><Border Background="#282F39" BorderBrush="#4A5563" BorderThickness="1" CornerRadius="12" Padding="7,2" Margin="4,0,0,0" ToolTip="{Binding Label}" AutomationProperties.Name="{Binding Label}">
+                            <StackPanel Orientation="Horizontal"><TextBlock Text="{Binding Text}" Foreground="#E8EEF7" FontSize="12" FontWeight="SemiBold"/>
+                              <TextBlock Text="{Binding Count}" Foreground="#E8EEF7" FontSize="12" FontWeight="SemiBold" Margin="5,0,0,0"/></StackPanel>
+                          </Border></DataTemplate></ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Grid.Column="1" Text="None" Visibility="{Binding NoDecorationsVisibility}" Foreground="#E8EEF7" FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                      </Grid>
+                    </Grid>
+                    <Grid><Grid.RowDefinitions><RowDefinition Height="1"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                      <Line X1="0" Y1="0" X2="1" Y2="0" Stretch="Fill" Stroke="#3E4A58" StrokeThickness="1" StrokeDashArray="2,2"/>
+                      <Grid Grid.Row="1" Margin="0,4"><Grid.ColumnDefinitions><ColumnDefinition Width="100"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <TextBlock Text="Total Defense" Foreground="#F3F6FA" FontWeight="Bold" FontSize="13"/>
+                        <TextBlock Grid.Column="1" Text="{Binding Defense}" Foreground="#F3F6FA" FontSize="12" HorizontalAlignment="Right"/>
+                      </Grid>
+                    </Grid>
+                    <Grid><Grid.RowDefinitions><RowDefinition Height="1"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                      <Line X1="0" Y1="0" X2="1" Y2="0" Stretch="Fill" Stroke="#3E4A58" StrokeThickness="1" StrokeDashArray="2,2"/>
+                      <Grid Grid.Row="1" Margin="0,4,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="100"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <TextBlock Text="Elements" Foreground="#F3F6FA" FontWeight="Bold" FontSize="13" VerticalAlignment="Center"/>
+                        <ItemsControl Grid.Column="1" ItemsSource="{Binding Elements}" HorizontalAlignment="Right">
+                          <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                          <ItemsControl.ItemTemplate><DataTemplate><StackPanel Orientation="Horizontal" Margin="6,0,0,0" ToolTip="{Binding Name}">
+                            <Image Source="{Binding Icon}" Width="15" Height="16" Stretch="Uniform" AutomationProperties.Name="{Binding Name}"/>
+                            <TextBlock Text="{Binding Value}" Foreground="#F3F6FA" FontSize="11" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                          </StackPanel></DataTemplate></ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                      </Grid>
+                    </Grid>
+                  </StackPanel>
+                </Grid>
+            </Border></DataTemplate></ListBox.ItemTemplate>
+          </ListBox>
+        </Grid>
+      </Border>
+    </Grid>
+      </TabItem>
+      <TabItem x:Name="CalculatorTab" Header="Damage Calculator"><local:DamageCalculatorView x:Name="CalculatorView"/></TabItem>
+      <TabItem x:Name="InfoTab" Header="Info"><local:SkillInfoView x:Name="InfoView"/></TabItem>
+    </TabControl>
+    <Grid Grid.Row="3" Margin="2,11,2,0"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+      <TextBlock x:Name="DataStatus" Foreground="#849BAE" FontSize="11"/>
+      <TextBlock Grid.Column="1" Text="Local data · calculator by Chan Le You (MIT)" Foreground="#849BAE" FontSize="11"/></Grid>
+  </Grid>
+</Window>

@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="MHWsTool.Checks/MHWsTool.Checks.csproj" />
+  <Project Path="MHWsTool/MHWsTool.csproj" />
+</Solution>
