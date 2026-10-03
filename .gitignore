@@ -1,6 +1,5 @@
 **/bin/
 **/obj/
-release/
 .vs/
 **/node_modules/
 **/.next/
